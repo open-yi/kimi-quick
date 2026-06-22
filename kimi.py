@@ -146,8 +146,31 @@ x, y = max(0, (screen_w - W) // 2), max(0, (screen_h - H) // 2)
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"
 
+
+class DragApi:
+    def start(self):
+        global hwnd, quit_flag
+        if not hwnd: hwnd = user32.FindWindowW(None, TITLE)
+        if not hwnd: return
+        # Capture initial positions
+        pt = ctypes.wintypes.POINT()
+        user32.GetCursorPos(ctypes.byref(pt))
+        r = ctypes.wintypes.RECT()
+        user32.GetWindowRect(hwnd, ctypes.byref(r))
+        sx, sy, wx, wy = pt.x, pt.y, r.left, r.top
+
+        def drag_loop():
+            while not quit_flag and (user32.GetAsyncKeyState(0x01) & 0x8000):
+                user32.GetCursorPos(ctypes.byref(pt))
+                user32.SetWindowPos(hwnd, 0,
+                    wx + pt.x - sx, wy + pt.y - sy, 0, 0, 0x0001 | 0x0004)
+                time.sleep(0.01)
+
+        threading.Thread(target=drag_loop, daemon=True).start()
+
+
 window = webview.create_window(
-    title=TITLE, url=URL,
+    title=TITLE, url=URL, js_api=DragApi(),
     width=W, height=H, x=x, y=y,
     resizable=False, on_top=True, frameless=True,
     easy_drag=False, confirm_close=False,
@@ -158,9 +181,10 @@ def on_loaded():
     window.evaluate_js("""
         var tb = document.createElement('div')
         tb.id = '__tb'
-        tb.innerHTML = '<img src="https://www.kimi.com/favicon.ico" style="width:18px;height:18px;margin-right:6px"><span style="color:#e0e0e0;font-size:13px;font-family:system-ui">Kimi</span>'
+        tb.innerHTML = '<img src="https://www.kimi.com/favicon.ico" style="width:18px;height:18px;margin-right:6px"><span style="font-size:13px;font-family:system-ui">Kimi</span>'
         tb.style.cssText = 'color:#333;position:fixed;top:0;left:0;right:0;height:32px;z-index:2147483647;background:#fff;display:flex;align-items:center;padding:0 10px;cursor:move'
         document.body.appendChild(tb)
+        tb.addEventListener('pointerdown', function() { window.pywebview.api.start() })
         var style = document.createElement('style');
         style.textContent = `
             html {

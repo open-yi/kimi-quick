@@ -69,6 +69,9 @@ def poll_f4():
                 else:
                     user32.SetWindowPos(hwnd, -1, x, y, W, H, 0)
                     user32.ShowWindow(hwnd, 5)
+                    # ponytail: bypass foreground lock via Alt key simulation
+                    user32.keybd_event(0x12, 0, 0, 0)
+                    user32.keybd_event(0x12, 0, 2, 0)
                     user32.SetForegroundWindow(hwnd)
                     try:
                         if webview.windows:
@@ -101,6 +104,8 @@ def tray_show_hide(icon, item):
         else:
             user32.SetWindowPos(hwnd, -1, x, y, W, H, 0)
             user32.ShowWindow(hwnd, 5)
+            user32.keybd_event(0x12, 0, 0, 0)
+            user32.keybd_event(0x12, 0, 2, 0)
             user32.SetForegroundWindow(hwnd)
 
 

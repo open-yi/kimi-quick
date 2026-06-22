@@ -26,6 +26,7 @@ if kernel32.GetLastError() == 183:
     sys.exit(0)
 
 quit_flag = False
+real_quit = False
 hwnd = None
 
 # ── F4 poller ────────────────────────────────────────────────────
@@ -112,8 +113,9 @@ def tray_refresh(icon, item):
 
 
 def tray_quit(icon, item):
-    global quit_flag
+    global quit_flag, real_quit
     quit_flag = True
+    real_quit = True
     icon.stop()
     try:
         if webview.windows:
@@ -244,5 +246,13 @@ def on_loaded():
     """)
 
 
+def on_closing():
+    global real_quit
+    if real_quit:
+        return True  # allow actual close
+    window.hide()
+    return False  # ponytail: hide instead of destroy, avoid WebView2 reinit white screen
+
+window.events.closing += on_closing
 window.events.loaded += on_loaded
 webview.start(debug=False, user_agent=UA, private_mode=False)

@@ -64,12 +64,18 @@ def poll_f4():
             if not hwnd or not user32.IsWindow(hwnd):
                 hwnd = user32.FindWindowW(None, TITLE)
             if hwnd and user32.IsWindow(hwnd):
-                if user32.IsWindowVisible(hwnd):
+                visible = user32.IsWindowVisible(hwnd)
+                focused = user32.GetForegroundWindow() == hwnd
+                if visible and focused:
                     user32.ShowWindow(hwnd, 0)
+                elif visible and not focused:
+                    # ponytail: steal focus back instead of hiding
+                    user32.keybd_event(0x12, 0, 0, 0)
+                    user32.keybd_event(0x12, 0, 2, 0)
+                    user32.SetForegroundWindow(hwnd)
                 else:
                     user32.SetWindowPos(hwnd, -1, x, y, W, H, 0)
                     user32.ShowWindow(hwnd, 5)
-                    # ponytail: bypass foreground lock via Alt key simulation
                     user32.keybd_event(0x12, 0, 0, 0)
                     user32.keybd_event(0x12, 0, 2, 0)
                     user32.SetForegroundWindow(hwnd)

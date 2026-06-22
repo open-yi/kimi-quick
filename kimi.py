@@ -150,9 +150,10 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.1
 class DragApi:
     def start(self):
         global hwnd, quit_flag
-        if not hwnd: hwnd = user32.FindWindowW(None, TITLE)
-        if not hwnd: return
-        # Capture initial positions
+        if not hwnd:
+            hwnd = user32.FindWindowW(None, TITLE)
+        if not hwnd:
+            return
         pt = ctypes.wintypes.POINT()
         user32.GetCursorPos(ctypes.byref(pt))
         r = ctypes.wintypes.RECT()
@@ -163,10 +164,17 @@ class DragApi:
             while not quit_flag and (user32.GetAsyncKeyState(0x01) & 0x8000):
                 user32.GetCursorPos(ctypes.byref(pt))
                 user32.SetWindowPos(hwnd, 0,
-                    wx + pt.x - sx, wy + pt.y - sy, 0, 0, 0x0001 | 0x0004)
+                                    wx + pt.x - sx, wy + pt.y - sy, 0, 0, 0x0001 | 0x0004)
                 time.sleep(0.01)
 
         threading.Thread(target=drag_loop, daemon=True).start()
+
+    def hide(self):
+        global hwnd
+        if not hwnd:
+            hwnd = user32.FindWindowW(None, TITLE)
+        if hwnd and user32.IsWindow(hwnd):
+            user32.ShowWindow(hwnd, 0)
 
 
 window = webview.create_window(
@@ -185,6 +193,7 @@ def on_loaded():
         tb.style.cssText = 'color:#333;position:fixed;top:0;left:0;right:0;height:32px;z-index:2147483647;background:#fff;display:flex;align-items:center;padding:0 10px;cursor:move'
         document.body.appendChild(tb)
         tb.addEventListener('pointerdown', function() { window.pywebview.api.start() })
+        setTimeout(function() { window.pywebview.api.hide() }, 2000)
         var style = document.createElement('style');
         style.textContent = `
             html {
@@ -202,4 +211,4 @@ def on_loaded():
 
 
 window.events.loaded += on_loaded
-webview.start(debug=True, user_agent=UA, private_mode=False)
+webview.start(debug=False, user_agent=UA, private_mode=False)

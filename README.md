@@ -1,6 +1,6 @@
 # Kimi Quick
 
-按 **F4** 键呼出/隐藏 Kimi 网页弹窗，375×667 移动端视口，始终置顶，全局热键。
+F4 一键呼出 Kimi 的 Windows 桌面工具。375×667 移动端视口，始终置顶，可拖拽，系统托盘常驻。单文件 exe，免安装，开机自启。
 
 ## 功能
 
@@ -12,11 +12,15 @@
 | 托盘图标 | 右键菜单：显示/隐藏、刷新、退出 |
 | 启动自动隐藏 | 启动后 2 秒自动隐藏，F4 呼出 |
 
-## 安装
+## 下载
+
+从 [Releases](../../releases) 下载 `KimiQuick.exe`，单文件免安装，双击运行。
+
+## 开发
 
 ```bash
 python -m venv venv
-venv\Scripts\pip install pywebview pystray pillow pyinstaller
+venv\Scripts\pip install -r requirements.txt
 ```
 
 ## 打包
@@ -42,12 +46,8 @@ venv\Scripts\python -m PyInstaller --onefile --windowed --icon=kimi_favicon.ico 
 ## 文件
 
 ```
-kimi-tool/
 ├── kimi.py              # 主程序 (~215 行)
 ├── kimi_favicon.ico     # 图标
-├── start.bat            # 开发启动脚本
-├── README.md
-├── venv/                # Python 虚拟环境
-└── dist/
-    └── KimiQuick.exe    # 打包输出
+├── requirements.txt
+└── README.md
 ```

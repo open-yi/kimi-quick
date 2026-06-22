@@ -14,7 +14,7 @@ URL = "https://www.kimi.com"
 CSS_W, CSS_H = 375, 667
 TITLE = "Kimi"
 VK_F4 = 0x73
-W, H = CSS_W + 16, CSS_H + 48  # frame + title bar compensation
+W, H = CSS_W + 16, CSS_H + 85  # frame + title bar compensation
 
 user32 = ctypes.windll.user32
 kernel32 = ctypes.windll.kernel32
@@ -190,18 +190,52 @@ def on_loaded():
         var tb = document.createElement('div')
         tb.id = '__tb'
         tb.innerHTML = '<img src="https://www.kimi.com/favicon.ico" style="width:18px;height:18px;margin-right:6px"><span style="font-size:13px;font-family:system-ui">Kimi</span>'
-        tb.style.cssText = 'color:#333;position:fixed;top:0;left:0;right:0;height:32px;z-index:2147483647;background:#fff;display:flex;align-items:center;padding:0 10px;cursor:move'
+        tb.style.cssText = 'color:#333;position:fixed;top:0;left:0;right:0;height:37px;z-index:2147483647;display:flex;align-items:center;padding:0 10px;cursor:move'
         document.body.appendChild(tb)
         tb.addEventListener('pointerdown', function() { window.pywebview.api.start() })
         setTimeout(function() { window.pywebview.api.hide() }, 2000)
         var style = document.createElement('style');
         style.textContent = `
             html {
-                padding-top: 32px;
+                padding-top: 37px;
                 overflow: hidden;
             }
         `;
         document.body.appendChild(style);
+        // ponytail: simulate touch events from pointer events — mobile UA needs TouchEvent
+        (function() {
+            var down = false;
+            document.addEventListener('pointerdown', function(e) {
+                down = true;
+                e.target.dispatchEvent(new TouchEvent('touchstart', {
+                    touches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    targetTouches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    changedTouches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    bubbles: true, cancelable: true
+                }));
+            });
+            document.addEventListener('pointermove', function(e) {
+                if (!down) return;
+                e.target.dispatchEvent(new TouchEvent('touchmove', {
+                    touches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    targetTouches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    changedTouches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    bubbles: true, cancelable: true
+                }));
+            });
+            document.addEventListener('pointerup', function(e) {
+                down = false;
+                e.target.dispatchEvent(new TouchEvent('touchend', {
+                    touches: [],
+                    targetTouches: [],
+                    changedTouches: [new Touch({identifier: 0, target: e.target, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, pageX: e.pageX, pageY: e.pageY})],
+                    bubbles: true, cancelable: true
+                }));
+            });
+            document.addEventListener('pointercancel', function(e) {
+                down = false;
+            });
+        })();
         (function tryFocus(n) {
             var el = document.querySelector('input:not([type="hidden"]), textarea, [contenteditable]');
             if (el) { el.focus(); return; }

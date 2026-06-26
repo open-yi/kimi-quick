@@ -31,7 +31,6 @@ CLIENT_HINT_HEADERS = {
     "sec-ch-ua-wow64": "?0",
 }
 
-
 def _inject_client_hints(window):
     def on_request(req):
         req.headers.update(CLIENT_HINT_HEADERS)
@@ -49,7 +48,6 @@ def _patch_webview_settings():
         settings.AreDefaultContextMenusEnabled = True
     EdgeChrome.on_webview_ready = _on_ready
 
-
 _patch_webview_settings()
 
 user32 = ctypes.windll.user32
@@ -66,8 +64,6 @@ real_quit = False
 hwnd = None
 
 # ── F4 poller ────────────────────────────────────────────────────
-
-
 def poll_f4():
     global hwnd
     f4_was_down = False
@@ -125,8 +121,6 @@ def poll_f4():
         time.sleep(0.05)
 
 # ── Tray ─────────────────────────────────────────────────────────
-
-
 def make_icon():
     import os
     if getattr(sys, 'frozen', False):
@@ -134,8 +128,6 @@ def make_icon():
     else:
         base = os.path.dirname(os.path.abspath(__file__))
     return Image.open(os.path.join(base, "kimi_favicon.ico"))
-
-
 def tray_show_hide(icon, item):
     global hwnd
     if not hwnd or not user32.IsWindow(hwnd):
@@ -149,16 +141,12 @@ def tray_show_hide(icon, item):
             user32.keybd_event(0x12, 0, 0, 0)
             user32.keybd_event(0x12, 0, 2, 0)
             user32.SetForegroundWindow(hwnd)
-
-
 def tray_refresh(icon, item):
     try:
         if webview.windows:
             webview.windows[0].evaluate_js("location.reload()")
     except Exception:
         pass
-
-
 def tray_quit(icon, item):
     global quit_flag, real_quit
     quit_flag = True
@@ -169,8 +157,6 @@ def tray_quit(icon, item):
             webview.windows[0].destroy()
     except Exception:
         pass
-
-
 def run_tray():
     try:
         icon = pystray.Icon("webpopup", make_icon(), "kimi",
@@ -183,8 +169,6 @@ def run_tray():
         icon.run()
     except Exception as e:
         print(f"[tray error] {e}", flush=True)
-
-
 # ── Launch ───────────────────────────────────────────────────────
 threading.Thread(target=poll_f4, daemon=True).start()
 threading.Thread(target=run_tray, daemon=True).start()
@@ -194,8 +178,6 @@ screen_h = user32.GetSystemMetrics(1)
 x, y = max(0, (screen_w - W) // 2), max(0, (screen_h - H) // 2)
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"
-
-
 class DragApi:
     _auto_hidden = False
 
@@ -242,8 +224,6 @@ class DragApi:
             hwnd = user32.FindWindowW(None, TITLE)
         if hwnd and user32.IsWindow(hwnd):
             user32.ShowWindow(hwnd, 0)
-
-
 window = webview.create_window(
     title=TITLE, url=URL, js_api=DragApi(),
     width=W, height=H, x=x, y=y,
@@ -252,8 +232,6 @@ window = webview.create_window(
 )
 
 _inject_client_hints(window)
-
-
 def on_loaded():
     window.evaluate_js("""
         var tb = document.createElement('div')
@@ -314,16 +292,12 @@ def on_loaded():
             if (n < 20) setTimeout(function() { tryFocus(n + 1); }, 500);
         })(0)
     """)
-
-
 def on_closing():
     global real_quit
     if real_quit:
         return True  # allow actual close
     window.hide()
     return False  # ponytail: hide instead of destroy, avoid WebView2 reinit white screen
-
-
 window.events.closing += on_closing
 window.events.loaded += on_loaded
 webview.start(debug=False, user_agent=UA, private_mode=False)

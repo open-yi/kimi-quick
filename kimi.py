@@ -232,6 +232,7 @@ window = webview.create_window(
 )
 
 _inject_client_hints(window)
+
 def on_loaded():
     window.evaluate_js("""
         var tb = document.createElement('div')

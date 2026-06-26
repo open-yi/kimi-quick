@@ -287,6 +287,7 @@ def on_loaded():
             }, {passive: false});
         })();
         (function tryFocus(n) {
+            if (!location.hostname.includes('kimi.com')) return;
             var el = document.querySelector('input:not([type="hidden"]), textarea, [contenteditable]');
             if (el) { el.focus(); return; }
             if (n < 20) setTimeout(function() { tryFocus(n + 1); }, 500);

@@ -38,8 +38,6 @@ def _inject_client_hints(window):
     window.events.request_sent += on_request
 
 # ponytail: enable clipboard (Ctrl+C/V) + right-click context menu in WebView2
-
-
 def _patch_webview_settings():
     from webview.platforms.edgechromium import EdgeChrome
     _orig = EdgeChrome.on_webview_ready

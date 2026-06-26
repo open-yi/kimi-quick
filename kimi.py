@@ -292,12 +292,14 @@ def on_loaded():
             if (n < 20) setTimeout(function() { tryFocus(n + 1); }, 500);
         })(0)
     """)
+
 def on_closing():
     global real_quit
     if real_quit:
         return True  # allow actual close
     window.hide()
     return False  # ponytail: hide instead of destroy, avoid WebView2 reinit white screen
+
 window.events.closing += on_closing
 window.events.loaded += on_loaded
 webview.start(debug=False, user_agent=UA, private_mode=False)
